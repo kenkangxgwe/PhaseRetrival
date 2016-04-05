@@ -69,7 +69,7 @@ if(step < 4)
     atomCutBk1 = openxlsFigures(path, 'fscannolabk', 1, 6, 'up');
     atomCutBk2 = openxlsFigures(path, 'fscannolabk', 1, 6, 'down');
 %     atomNoCut = openxlsFigures(path, 'p10n10acut', 14, 14, 'up');
-%     atomNoCutRef = openxlsFigures(path, 'p10n10acut', 14, 14, 'down');
+%     at    omNoCutRef = openxlsFigures(path, 'p10n10acut', 14, 14, 'down');
 
 %     atomNoCut = max(atomNoCut - bg1, 10);
 %     atomNoCutRef = max(atomNoCutRef - bg1, 10);
