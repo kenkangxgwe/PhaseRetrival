@@ -25,4 +25,4 @@ This function calculate the phase of the reference image according to the result
 
 By subtracting the signal and reference image, we got the hologram of the atomic signal.
 
-[^1]: James, Imaging cold atoms with shot-noise and diffraction limited holographic microsocpy
+[^1]: James, Imaging cold atoms with shot-noise and diffraction limited holographic microscopy
