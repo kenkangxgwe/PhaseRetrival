@@ -1,7 +1,7 @@
 function ImageArray = openxlsFigures(FilePath, FileName, head, tail, pos)
 
-impPath = [FilePath 'Data\'];
-expPath = [FilePath 'Data\Merge\'];
+impPath = [FilePath];
+expPath = [FilePath 'Merge\'];
 
 loadsave = 1;
 if(loadsave && exist([expPath FileName pos '.mat'], 'file') )
