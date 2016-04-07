@@ -5,11 +5,9 @@
 
 wavelength = 0.7667;
 pixelsize = 6.5;
-step = 2;
-path = 'G:\新建文件夹\Experiment\20Mar2016\';
+step = 3;
+path = 'G:\新建文件夹\Experiment\7Apr2016\';
 
-% bg1 = openxlsFigures(path, 'BK', 1, 10, 'up');
-% bg2 = openxlsFigures(path, 'BK', 1, 10, 'down');
 refZ = - 0.0505 * 25400; % Distance in mm
 
 %% RefPhaseRetrival1
@@ -17,25 +15,25 @@ refZ = - 0.0505 * 25400; % Distance in mm
 
 if(bitand(step, 1) )
     %From top to bottom, the distance decreases and the light spot shrinks
-    a1 = openxlsFigures(path, 'waveB', 1, 100, 'up');
-    bg1 = openxlsFigures(path, 'waveBbk', 1, 100, 'up');
+    a1 = openxlsFigures(path 'WavefrontMeasurement', 'waveB', 1, 100, 'up');
+    bg1 = openxlsFigures(path 'WavefrontMeasurement', 'waveBbk', 1, 100, 'up');
     a1 = max(a1 - bg1, 0);
-    z1 = - 0.2500 * 25400; 
+    z1 = - 0.2721 * 25400; 
 
-    a2 = openxlsFigures(path, 'waveC', 2, 100, 'up');
-    bg2 = openxlsFigures(path, 'waveCbk', 23, 100, 'up');
+    a2 = openxlsFigures(path 'WavefrontMeasurement', 'waveC', 1, 100, 'up');
+    bg2 = openxlsFigures(path 'WavefrontMeasurement', 'waveCbk', 1, 100, 'up');
     a2 = max(a2 - bg2, 0);
     z2 = - 0.3500 * 25400;
     
-    a3 = openxlsFigures(path, 'waveD', 1, 100, 'up');
-    bg3 = openxlsFigures(path, 'waveDbk', 1, 100, 'up');
+    a3 = openxlsFigures(path 'WavefrontMeasurement', 'waveD', 1, 100, 'up');
+    bg3 = openxlsFigures(path 'WavefrontMeasurement', 'waveDbk', 1, 100, 'up');
     a3 = max(a3 - bg3, 0);
     z3 = - 0.5000 * 25400;
     
-    a4 = openxlsFigures(path, 'waveE', 1, 100, 'up');
-    bg4 = openxlsFigures(path, 'waveEbk', 2, 89, 'up');
+    a4 = openxlsFigures(path 'WavefrontMeasurement', 'waveE', 1, 100, 'up');
+    bg4 = openxlsFigures(path 'WavefrontMeasurement', 'waveEbk', 1, 100, 'up');
     a4 = max(a4 - bg4, 0);
-    z4 = - 0.6050 * 25400;
+    z4 = - 0.6080 * 25400;
 
     RefPhaseRetrival1(a4, a3, a2, a1, z4, z3, z2, z1, pixelsize, wavelength, path);
 end
@@ -45,11 +43,11 @@ end
 % image via image a1
 
 if(bitand(step, 2) )
-    refimg = openxlsFigures(path, 'waveA', 1, 100, 'up');
-    refbg = openxlsFigures(path, 'waveAbk', 1, 100, 'up');
+    refimg = openxlsFigures(path 'WavefrontMeasurement', 'waveA', 1, 100, 'up');
+    refbg = openxlsFigures(path 'WavefrontMeasurement', 'waveAbk', 1, 100, 'up');
     refimg = max(refimg - refbg, 0);
-    a1 = openxlsFigures(path, 'waveB', 1, 100, 'up');
-    bg1 = openxlsFigures(path, 'waveBbk', 1, 100, 'up');
+    a1 = openxlsFigures(path 'WavefrontMeasurement', 'waveB', 1, 100, 'up');
+    bg1 = openxlsFigures(path 'WavefrontMeasurement', 'waveBbk', 1, 100, 'up');
     a1 = max(a1 - bg1, 0);
     z1 = - 0.2500 * 25400; 
 
