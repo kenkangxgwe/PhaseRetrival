@@ -16,9 +16,10 @@ end
 block = ones(1040,1392);
 block(300:480, 250:750) = 0;
 
-fun1 = @(x) var( (holI (block == 1) - x^2 * refI (block == 1) ) );
-[coef] = fminunc(fun1,1);
-coRefI = coef^2;
+% fun1 = @(x) rms( (holI (block == 1) - x^2 * refI (block == 1) ) );
+% [coef] = fminunc(fun1, 1);
+% coRefI = coef^2;
+coRefI = 1;
 holDiff = (holI - coRefI * refI);
 refDiff = refI - refBg;
 holDiff = holDiff .* (refDiff >= 0.01);
@@ -63,19 +64,11 @@ nxDisp=2000:4000;
 nyDisp=2000:4000;
 gpuHolE = gpuArray(holE);
 
-x = 1:6:6240;
-y = 1:6:8352;
-z = 1;
 figure;
-for sigZ = (- 0.0505 * 25400) : -100 : (- 0.6050 * 25400)
-    % sigZ = -12500;
+% for sigZ = (- 0.0505 * 25400) : -100 : (- 0.6050 * 25400)
+    sigZ = -0.573 * 25400;
     sigE = ifft2(kwindow .* exp(1i * sqrt(k^2 - kkx .^ 2 - kky .^ 2) * (sigZ - refZ) ) .* fft2(gpuHolE , eySize, exSize) );
-%     imagesc(abs(sigE(nyDisp,nxDisp) ) ); colorbar; title(['sigZ = ' num2str(sigZ)]);
-%     drawnow;
-    z = z + 1
-    spaceMat(:, :, z) = abs(sigE(x,y) );
+    imagesc(abs(sigE(nyDisp,nxDisp) ) ); colorbar; title(['sigZ = ' num2str(sigZ)]);
+    drawnow;
+%      spaceMat(:, :, z) = abs(sigE(x,y) );
 end
-
-[x,y,z] = meshgrid(1:1392,1:1040,1:142);
-zslice = 1:142; 
-slice(x, y, z, spaceMat, [], [], zslice);
