@@ -39,8 +39,8 @@ kwindow = kwindow > (max(kwindow(:) ) / 2.71828);
 gpuSrcimg = gpuArray(srcimg);
 tarWave = ifft2(kwindow .* exp(1i * sqrt(k^2 - kkx .^ 2 - kky .^ 2) * (tarZ - srcZ) ) .* fft2(gpuSrcimg .* exp(1i * srcPhi), eySize, exSize) );
 tarWave = [tarWave(1: rowSize , 1 : 7500), zeros(rowSize, colSize - 7500)];
+tarPhi = angle(tarWave);
 tarWave = gather(abs(tarWave) );
 tarWave = double(imresize(tarWave, 1 / resize, 'nearest') );
 figure; imagesc(abs(tarWave) );
 residue = mean(abs( abs( tarWave(tarimg ~= 0) ) / mean( abs( tarWave(tarimg ~= 0) ) ) - abs(tarimg(tarimg ~= 0) / mean(tarimg(tarimg ~= 0) ) ) ) ./ (abs(tarimg(tarimg ~= 0) ) / mean(tarimg(tarimg ~= 0) ) ) )
-tarPhi = angle(tarWave);
