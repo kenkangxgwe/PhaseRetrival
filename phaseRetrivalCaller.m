@@ -64,6 +64,6 @@ if(bitand(step, 4) )
     atomCutRef = openxlsFigures(strcat(path,'Dipoletrap_MOT1d0V_Exp1d0ms\'), 'Dipoletrap_MOT1d0V_Exp1d0ms', 200, 200, 'down');
     atomCutBk1 = openxlsFigures(strcat(path,'Dipoletrap_MOT1d0V_Exp1d0ms\'), 'BK', 2, 10, 'up');
     atomCutBk2 = openxlsFigures(strcat(path,'Dipoletrap_MOT1d0V_Exp1d0ms\'), 'BK', 2, 10, 'down');
-
-    SignalPhaseRetrival1(atomCut, atomCutRef, refZ, atomCutBk1, atomCutBk2, pixelsize, wavelength, path);
+    [coRef, coHolbg, coRefbg] = HologramOptimization1(atomCut, atomCutRef, refZ, atomCutBk1, atomCutBk2, pixelsize, wavelength, path);
+    SignalImageRetrival1(atomCut, coRef * atomCutRef, refZ, coHolbg * atomCutBk1, coRefbg * atomCutBk2, pixelsize, wavelength, path);
 end
