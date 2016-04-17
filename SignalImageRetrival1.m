@@ -1,4 +1,4 @@
-function SignalPhaseRetrival1(holI, refI, refZ, holBg, refBg, pixelsize, wavelength, FilePath)
+function SignalImageRetrival1(holI, refI, refZ, holBg, refBg, pixelsize, wavelength, FilePath)
 
 gpuDevice(1);
 resize = 6;
@@ -12,31 +12,10 @@ else
     error('ReferencePhase.mat does not exist');
 end
 
-% Set a block at [300:480,250:750]
-block = ones(1040,1392);
-block(300:480, 250:750) = 0;
-
-% fun1 = @(x) rms( (holI (block == 1) - x^2 * refI (block == 1) ) );
-% [coef] = fminunc(fun1, 1);
-% coRefI = coef^2;
-coRefI = 1;
-holDiff = (holI - coRefI * refI);
+holDiff = (holI -  refI);
 refDiff = refI - refBg;
 holDiff = holDiff .* (refDiff >= 0.01);
 refDiff = max(refDiff, 0.01);
-
-% fun2 = @(x) rms(rms(holDiff - x(1)^2 * holBg + x(2)^2 * refBg) );
-% [coef] = fminunc(fun2,[1,1]);
-% coHolBg = coef(1)^2;
-% coRefBg = coef(2)^2;
-% holDiff = holDiff - coHolBg * holBg + coRefBg * refBg;
-
-% fun = @(x) rms(rms( (holDiff - x(1)^2 * holBg + x(2)^2 * refBg) .* (holI <= 1020) ) );
-% [coef] = fminunc(fun2,[1,1]);
-% coHolBg = coef(1)^2;
-% coRefBg = coef(2)^2;
-% holDiff = holDiff - coHolBg * holBg + coRefBg * refBg;
-% holDiff = abs(holDiff);
 
 holDiff = double(imresize(holDiff, resize, 'nearest') );
 refE = double(imresize(sqrt(refDiff), resize, 'nearest') ); % E = sqrt(I)
@@ -64,11 +43,23 @@ nxDisp=2000:4000;
 nyDisp=2000:4000;
 gpuHolE = gpuArray(holE);
 
+% if(exist([resPath 'Dipoletrap_MOT1d0V_Exp1d0ms.mat'], 'file') )
+%     load([resPath 'Dipoletrap_MOT1d0V_Exp1d0ms.mat'], 'spaceMat');
+% else
 figure;
-% for sigZ = (- 0.0505 * 25400) : -100 : (- 0.6050 * 25400)
-    sigZ = -0.573 * 25400;
+% z = 1;
+for sigZ = (- 0.0505 * 25400) : -100 : (- 0.6080 * 25400)
+    %     sigZ = -0.573 * 25400;
     sigE = ifft2(kwindow .* exp(1i * sqrt(k^2 - kkx .^ 2 - kky .^ 2) * (sigZ - refZ) ) .* fft2(gpuHolE , eySize, exSize) );
     imagesc(abs(sigE(nyDisp,nxDisp) ) ); colorbar; title(['sigZ = ' num2str(sigZ)]);
     drawnow;
-%      spaceMat(:, :, z) = abs(sigE(x,y) );
+    %         spaceMat(:, :, z) =imresize(abs(sigE(nyDisp,nxDisp) ), 1/resize);
+    %     z = z + 1;
 end
+%     save([resPath 'Dipoletrap_MOT1d0V_Exp1d0ms.mat'], 'spaceMat');
+% end
+% 
+% [x,y,z] = meshgrid(1 : size(spaceMat, 1), 1 : size(spaceMat, 2), 1 : size(spaceMat, 3) );
+% zslice = 1 : size(spaceMat, 3);
+% slice(x, y, z, spaceMat, [], [], zslice);
+
