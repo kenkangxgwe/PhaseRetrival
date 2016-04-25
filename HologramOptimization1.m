@@ -1,4 +1,4 @@
-function coef = HologramOptimization1(holI, refI, refZ, holBg, refBg, pixelsize, wavelength, FilePath)
+function [coRefI, coHolBg, coRefBg] = HologramOptimization1(holI, refI, refZ, holBg, refBg, pixelsize, wavelength, FilePath)
 
 gpuDevice(1);
 resize = 6;
@@ -38,25 +38,27 @@ gpuRefE = gpuArray(refE .* exp(1i * refPhi) );
 
 crossHolE = ifft2(kwindow .* exp(1i * sqrt(k^2 - kkx .^ 2 - kky .^ 2) * (crossZ - refZ) ) .* fft2(gpuHolE , eySize, exSize) );
 crossRefE = ifft2(kwindow .* exp(1i * sqrt(k^2 - kkx .^ 2 - kky .^ 2) * (crossZ - refZ) ) .* fft2(gpuRefE , eySize, exSize) );
-% figure; imagesc(abs(crossHolE) ); colorbar; drawnow;
-% figure; imagesc(abs(crossRefE) ); colorbar; drawnow;
 
+% Craft the area into where only the cross is visible
 crossHolE =  gather(abs(crossHolE(2200 : 3600, 2400 : 3800) ) );
 crossRefE =  gather(abs(crossRefE(2200 : 3600, 2400 : 3800) ) );
-RoICrossHolE = abs(gradient(crossHolE) );
-RoICrossRefE = abs(gradient(crossHolE) );
+% gradCrossHolE = abs(gradient(crossHolE) );
+gradCrossRefE = abs(gradient(crossRefE) );
+figure; subplot(2,2,1); title(['crossRefE']); imagesc(abs(crossRefE) ); colorbar;
+subplot(2,2,2); title(['gradCrossRefE']); imagesc(abs(gradCrossRefE) ); colorbar;
 
-% Set a block at [300:480,250:750]
-% block = ones(1040,1392);
-% block(300:480, 250:750) = 0;
+% Optimize by minimize the variance of the difference between 
+% the signal and the reference image in the range of interest
 fun1 = @(x) var(crossHolE(:).^2 - x^2 * crossRefE(:).^2 );
 [coef] = fminunc(fun1, 1);
 coRefI = coef^2;
 holIDiff = (holI - coRefI * refI);
 fun1(1)
 fun1(coef)
-figure; imagesc(crossHolE.^2 - coRefI * crossRefE.^2); colorbar; drawnow;
+figure; subplot(2,2,3); title(['crossHolE.^2 - coRefI * crossRefE.^2']); imagesc(crossHolE.^2 - coRefI * crossRefE.^2); colorbar;
 
+% Optimize by minimize the root mean square of difference between
+% the images and their backgrouds
 fun2 = @(x) rms(holIDiff(:) - x(1)^2 * holBg(:) + x(2)^2 * refBg(:));
 [coef] = fminunc(fun2, [1,1]);
 coHolBg = coef(1)^2;
@@ -65,5 +67,5 @@ holIDiff = (holIDiff - coHolBg * holBg - coRefBg * refBg);
 fun2([1,1])
 fun2(coef)
 
-figure; imagesc(abs(holIDiff) ); colorbar; drawnow;
+subplot(2,2,4); title(['holIDiff']); imagesc(abs(holIDiff) ); colorbar; drawnow;
 end
