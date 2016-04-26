@@ -4,8 +4,15 @@ gpuDevice(1);
 resize = 6;
 k = 2 * pi / wavelength;  %Wave Vector
 NAs = 0.4;
-crossZ = -9470; % we get the positon of cross manually
+
 resPath = [FilePath 'Result\'];
+
+if(exist([resPath 'crossZ.mat'], 'file') )
+    load([resPath 'crossZ.mat'], 'crossZ');
+else
+    crossZ = -9712; % we get the positon of cross manually
+    save([resPath 'crossZ.mat'], 'crossZ');
+end
 
 if(exist([resPath 'ReferencePhase.mat'], 'file') )
     load([resPath 'ReferencePhase.mat'], 'refPhi');
@@ -55,7 +62,7 @@ coRefI = coef^2;
 holIDiff = (holI - coRefI * refI);
 fun1(1)
 fun1(coef)
-figure; subplot(2,2,3); title(['crossHolE.^2 - coRefI * crossRefE.^2']); imagesc(crossHolE.^2 - coRefI * crossRefE.^2); colorbar;
+subplot(2,2,3); title(['crossHolE.^2 - coRefI * crossRefE.^2']); imagesc(crossHolE.^2 - coRefI * crossRefE.^2); colorbar;
 
 % Optimize by minimize the root mean square of difference between
 % the images and their backgrouds
@@ -67,5 +74,5 @@ holIDiff = (holIDiff - coHolBg * holBg - coRefBg * refBg);
 fun2([1,1])
 fun2(coef)
 
-subplot(2,2,4); title(['holIDiff']); imagesc(abs(holIDiff) ); colorbar; drawnow;
+subplot(2,2,4); title(['holIDiff']); imagesc(abs(holIDiff) ); colorbar;
 end
