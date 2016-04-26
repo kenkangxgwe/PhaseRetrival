@@ -1,4 +1,4 @@
-function SignalImageRetrival1(holI, refI, refZ, holBg, refBg, pixelsize, wavelength, FilePath)
+function SignalImageRetrival1(holI, refI, refZ, focZ, holBg, refBg, pixelsize, wavelength, FilePath)
 
 gpuDevice(1);
 resize = 6;
@@ -12,7 +12,7 @@ else
     error('ReferencePhase.mat does not exist');
 end
 
-holDiff = (holI -  refI);
+holDiff = (holI -  refI - holBg + refBg);
 refDiff = refI - refBg;
 holDiff = holDiff .* (refDiff >= 0.01);
 refDiff = max(refDiff, 0.01);
@@ -42,21 +42,23 @@ kwindow = kwindow > (max(kwindow(:) ) / 2.71828);
 nxDisp=2000:4000;
 nyDisp=2000:4000;
 gpuHolE = gpuArray(holE);
+% gpuHolE = gpuArray(refE .* exp(1i * refPhi) );
 
-% if(exist([resPath 'Dipoletrap_MOT1d0V_Exp1d0ms.mat'], 'file') )
-%     load([resPath 'Dipoletrap_MOT1d0V_Exp1d0ms.mat'], 'spaceMat');
+% if(exist([resPath 'Dipoletrap_MOT1d0V_Exp1d0ms200.mat'], 'file') )
+%     load([resPath 'Dipoletrap_MOT1d0V_Exp1d0ms200.mat'], 'spaceMat');
 % else
 figure;
 % z = 1;
-for sigZ = (- 0.0505 * 25400) : -100 : (- 0.6080 * 25400)
-    %     sigZ = -0.573 * 25400;
+for sigZ = refZ : -100 : focZ
+% for sigZ = -9652.7 : -10 : -9782.7
+%         sigZ = -9682.7
     sigE = ifft2(kwindow .* exp(1i * sqrt(k^2 - kkx .^ 2 - kky .^ 2) * (sigZ - refZ) ) .* fft2(gpuHolE , eySize, exSize) );
     imagesc(abs(sigE(nyDisp,nxDisp) ) ); colorbar; title(['sigZ = ' num2str(sigZ)]);
     drawnow;
     %         spaceMat(:, :, z) =imresize(abs(sigE(nyDisp,nxDisp) ), 1/resize);
     %     z = z + 1;
 end
-%     save([resPath 'Dipoletrap_MOT1d0V_Exp1d0ms.mat'], 'spaceMat');
+%     save([resPath 'Dipoletrap_MOT1d0V_Exp1d0ms200.mat'], 'spaceMat');
 % end
 % 
 % [x,y,z] = meshgrid(1 : size(spaceMat, 1), 1 : size(spaceMat, 2), 1 : size(spaceMat, 3) );
