@@ -1,4 +1,4 @@
-function [coRefI, coHolBg, coRefBg] = HologramOptimization1(holI, refI, refZ, holBg, refBg, pixelsize, wavelength, FilePath)
+function [coRefI, coHolBg, coRefBg] = HologramOptimization1(holI, refI, holBg, refBg, refZ, pixelsize, wavelength, FilePath)
 
 gpuDevice(1);
 resize = 6;
