@@ -1,4 +1,4 @@
-function SignalImageRetrival1(holI, refI, refZ, focZ, holBg, refBg, pixelsize, wavelength, FilePath)
+function SignalImageRetrival1(holI, refI, holBg, refBg, refZ, focZ, pixelsize, wavelength, FilePath)
 
 gpuDevice(1);
 resize = 6;
