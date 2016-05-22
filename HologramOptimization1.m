@@ -3,7 +3,7 @@ function [coRefI, coHolBg, coRefBg] = HologramOptimization1(holI, refI, refZ, ho
 gpuDevice(1);
 resize = 6;
 k = 2 * pi / wavelength;  %Wave Vector
-NAs = 0.4;
+NAs = 0.35;
 
 resPath = [FilePath 'Result\'];
 
