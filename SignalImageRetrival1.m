@@ -3,7 +3,7 @@ function SignalImageRetrival1(holI, refI, refZ, focZ, holBg, refBg, pixelsize, w
 gpuDevice(1);
 resize = 6;
 k = 2 * pi / wavelength;  %Wave Vector
-NAs = 0.4;
+NAs = 0.35;
 resPath = [FilePath 'Result\'];
 
 if(exist([resPath 'ReferencePhase.mat'], 'file') )
@@ -47,9 +47,13 @@ gpuHolE = gpuArray(holE);
 % if(exist([resPath 'Dipoletrap_MOT1d0V_Exp1d0ms200.mat'], 'file') )
 %     load([resPath 'Dipoletrap_MOT1d0V_Exp1d0ms200.mat'], 'spaceMat');
 % else
+
 figure;
 % z = 1;
+% zAtom=(-.573)*25400;
+
 for sigZ = refZ : -100 : focZ
+% for sigZ = (zAtom+2000):-100 : (zAtom-2000)
 % for sigZ = -9652.7 : -10 : -9782.7
 %         sigZ = -9682.7
     sigE = ifft2(kwindow .* exp(1i * sqrt(k^2 - kkx .^ 2 - kky .^ 2) * (sigZ - refZ) ) .* fft2(gpuHolE , eySize, exSize) );
@@ -58,6 +62,7 @@ for sigZ = refZ : -100 : focZ
     %         spaceMat(:, :, z) =imresize(abs(sigE(nyDisp,nxDisp) ), 1/resize);
     %     z = z + 1;
 end
+
 %     save([resPath 'Dipoletrap_MOT1d0V_Exp1d0ms200.mat'], 'spaceMat');
 % end
 % 
