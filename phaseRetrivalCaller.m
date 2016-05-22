@@ -1,7 +1,8 @@
-%% phaseRetrivalCaller
-% A function caller, which not only calls functions step by step, but can also
-% jump to a specific function directly if the program has finished the former
-% functions before.
+phaseRetrivalCaller(confFile)
+% A function caller, all parameters are set by configuration .xml file.
+% The function not only calls functions step by step,
+% but can also jump to a specific function directly
+% if the program has finished the former functions before.
 
 wavelength = 0.7667;
 pixelsize = 6.5;
