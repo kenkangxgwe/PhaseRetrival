@@ -7,13 +7,6 @@ NAs = 0.35;
 
 resPath = [FilePath 'Result\'];
 
-if(exist([resPath 'crossZ.mat'], 'file') )
-    load([resPath 'crossZ.mat'], 'crossZ');
-else
-    crossZ = -9712; % we get the positon of cross manually
-    save([resPath 'crossZ.mat'], 'crossZ');
-end
-
 if(exist([resPath 'ReferencePhase.mat'], 'file') )
     load([resPath 'ReferencePhase.mat'], 'refPhi');
 else
@@ -43,26 +36,22 @@ kwindow = kwindow > (max(kwindow(:) ) / 2.71828);
 gpuHolE = gpuArray(holE .* exp(1i * refPhi) );
 gpuRefE = gpuArray(refE .* exp(1i * refPhi) );
 
-crossHolE = ifft2(kwindow .* exp(1i * sqrt(k^2 - kkx .^ 2 - kky .^ 2) * (crossZ - refZ) ) .* fft2(gpuHolE , eySize, exSize) );
-crossRefE = ifft2(kwindow .* exp(1i * sqrt(k^2 - kkx .^ 2 - kky .^ 2) * (crossZ - refZ) ) .* fft2(gpuRefE , eySize, exSize) );
+atomHolE = ifft2(kwindow .* exp(1i * sqrt(k^2 - kkx .^ 2 - kky .^ 2) * (atomZ - refZ) ) .* fft2(gpuHolE , eySize, exSize) );
+atomRefE = ifft2(kwindow .* exp(1i * sqrt(k^2 - kkx .^ 2 - kky .^ 2) * (atomZ - refZ) ) .* fft2(gpuRefE , eySize, exSize) );
 
-% Craft the area into where only the cross is visible
-crossHolE =  gather(abs(crossHolE(2200 : 3600, 2400 : 3800) ) );
-crossRefE =  gather(abs(crossRefE(2200 : 3600, 2400 : 3800) ) );
-% gradCrossHolE = abs(gradient(crossHolE) );
-gradCrossRefE = abs(gradient(crossRefE) );
-figure; subplot(2,2,1); title(['crossRefE']); imagesc(abs(crossRefE) ); colorbar;
-subplot(2,2,2); title(['gradCrossRefE']); imagesc(abs(gradCrossRefE) ); colorbar;
+% Craft the area to enlarge the atom point
+atomHolE =  gather(abs(atomHolE(3030 : 3170, 4020 : 4120) ) );
+atomRefE =  gather(abs(atomRefE(3030 : 3170, 4020 : 4120) ) );
 
 % Optimize by minimize the variance of the difference between 
 % the signal and the reference image in the range of interest
-fun1 = @(x) var(crossHolE(:).^2 - x^2 * crossRefE(:).^2 );
+fun1 = @(x) var(atomHolE(:).^2 - x^2 * atomRefE(:).^2 );
 [coef] = fminunc(fun1, 1);
 coRefI = coef^2;
 holIDiff = (holI - coRefI * refI);
 fun1(1)
 fun1(coef)
-subplot(2,2,3); title(['crossHolE.^2 - coRefI * crossRefE.^2']); imagesc(crossHolE.^2 - coRefI * crossRefE.^2); colorbar;
+subplot(2,2,3); title(['atomHolE.^2 - coRefI * atomRefE.^2']); imagesc(atomHolE.^2 - coRefI * atomRefE.^2); colorbar;
 
 % Optimize by minimize the root mean square of difference between
 % the images and their backgrouds
@@ -74,5 +63,5 @@ holIDiff = (holIDiff - coHolBg * holBg - coRefBg * refBg);
 fun2([1,1])
 fun2(coef)
 
-subplot(2,2,4); title(['holIDiff']); imagesc(abs(holIDiff) ); colorbar;
+figure; title(['holIDiff']); imagesc(abs(holIDiff) ); colorbar;
 end
