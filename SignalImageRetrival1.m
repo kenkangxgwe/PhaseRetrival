@@ -17,8 +17,8 @@ refDiff = refI - refBg;
 holDiff = holDiff .* (refDiff >= 0.01);
 refDiff = max(refDiff, 0.01);
 
-holDiff = double(imresize(holDiff, resize, 'nearest') );
-refE = double(imresize(sqrt(refDiff), resize, 'nearest') ); % E = sqrt(I)
+holDiff = imresize(gpuArray(holDiff), resize);
+refE = real(sqrt(complex(imresize(gpuArray(refDiff), resize) ) ) ); % E = sqrt(I)
 
 holE = holDiff./ (refE .* exp(- 1i * refPhi) );
 
@@ -31,17 +31,14 @@ kmeshx = 2 * pi / (mesh * exSize);
 kmeshy = 2 * pi / (mesh * eySize);
 kx = ( (1 : exSize) - exSize / 2 - 1) * kmeshx; 
 ky = ( (1 : eySize) - eySize / 2 - 1) * kmeshy;
-kx = fftshift(kx);
-ky = fftshift(ky);
+kx = fftshift(kx); ky = fftshift(ky);
 [kkx, kky] = meshgrid(kx, ky);
-kkx = gpuArray(kkx);
-kky = gpuArray(kky);
+kkx = gpuArray(kkx); kky = gpuArray(kky);
 kwindow = exp(- (kkx .^ 2+kky .^ 2) / k^2 / NAs^2);
 kwindow = kwindow > (max(kwindow(:) ) / 2.71828);
 
 nxDisp=2000:4000;
 nyDisp=2000:4000;
-gpuHolE = gpuArray(holE);
 % gpuHolE = gpuArray(refE .* exp(1i * refPhi) );
 
 % if(exist([resPath 'Dipoletrap_MOT1d0V_Exp1d0ms200.mat'], 'file') )

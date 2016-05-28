@@ -16,6 +16,7 @@ pixelsize = allparams.getSoleElementData('pixelsize').str2double;
 step = bin2dec(allparams.getSoleElementData('step').char);
 path = allparams.getSoleElementData('path').char;
 
+% Distance in um
 focZ = 0.625 * focusimage.getSoleElementData('z').str2double;
 medZ1 = 0.625 * medianimage1.getSoleElementData('z').str2double; 
 medZ2 = 0.625 * medianimage2.getSoleElementData('z').str2double; 
@@ -87,7 +88,7 @@ if(bitand(step, 4) )
     atomRefBg = atomBg(:,:,2);
     atomBg = atomBg(:,:,1);
     
-    [coRef, coHolbg, coRefbg] = HologramOptimization1(atomImg, atomRefImg, atomBg, atomRefBg, refZ, pixelsize, wavelength, path);
+    [coRef, coHolbg, coRefbg] = AtomHologramOptimization(atomImg, atomRefImg, atomBg, atomRefBg, refZ, pixelsize, wavelength, path);
     % coRef = 1; coHolbg = 1; coRefbg = 0;
     SignalImageRetrival1(atomCut, coRef * atomCutRef, coHolbg * atomCutBk1, coRefbg * atomCutBk2, refZ, focZ, pixelsize, wavelength, path);
 end
