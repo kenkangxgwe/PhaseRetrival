@@ -1,9 +1,11 @@
-function SignalImageRetrival1(holI, refI, holBg, refBg, refZ, focZ, pixelsize, wavelength, FilePath)
+function SignalImageRetrival1(holI, refI, holBg, refBg, refZ, focZ, params, FilePath)
 
 gpuDevice(1);
+wavelength =  params.wavelength;
+pixelsize = params.pixelsize;
+NAs = params.NAs;
 resize = 6;
 k = 2 * pi / wavelength;  %Wave Vector
-NAs = 0.35;
 resPath = [FilePath 'Result\'];
 
 if(exist([resPath 'ReferencePhase.mat'], 'file') )

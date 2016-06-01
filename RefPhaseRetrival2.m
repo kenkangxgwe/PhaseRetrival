@@ -1,13 +1,15 @@
-function tarPhi = RefPhaseRetrival2(srcImg, srcZ, tarImg, tarZ, pixelsize, wavelength, FilePath)
+function tarPhi = RefPhaseRetrival2(srcImg, srcZ, tarImg, tarZ, params, FilePath)
 
 gpuDevice(1);
+wavelength =  params.wavelength;
+pixelsize = params.pixelsize;
+NAs = params.NAs;
 resize = 6;
 k = 2 * pi / wavelength;  %Wave Vector
-NAs = 0.35;
 resPath = [FilePath 'Result\'];
 
 if(exist([resPath 'currentphase.mat'], 'file') )
-    load([resPath 'currentphase.mat'], 'curPhi');
+    load([resPath 'currentphase.mat'], 'curPhiSmoothed');
     srcPhi = curPhiSmoothed;
 else
     error('currentphase.mat does not exist');
@@ -60,7 +62,7 @@ subplot(1,2,2); imagesc(abs(tarImg) ); title('original image');
 drawnow; 
 
 % Calculate the residue
+% See RefPhaseRetrival1.m for more infomation about residue
 a = tarWave(100 : 1000, 200 : 1100); a = a(:);
 b = tarImg(100 : 1000, 200 : 1100); b = b(:);
-
-residue = 1 - (dot(a - mean(a), b - mean(b) ) / (size([a; b], 2) * std(a) * std(b) );
+residue = 1 - sum(a.*b) /sqrt(sum(a.^2)*sum(b.^2))
