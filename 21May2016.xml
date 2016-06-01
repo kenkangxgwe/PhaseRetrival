@@ -1,7 +1,10 @@
 <?xml version="1.0" encoding="gb2312"?>
 <phaseRetrivalCallerParams>
-	<wavelength>0.7667</wavelength>
-	<pixelsize>6.5</pixelsize>
+	<opticalparams>
+		<wavelength>0.7667</wavelength>
+		<pixelsize>6.5</pixelsize>
+		<NAs>3.5</NAs>
+	</opticalparams>
 	<step>001</step>
 	<path>G:\新建文件夹\Experiment\21May2016\</path>
 	<images>
