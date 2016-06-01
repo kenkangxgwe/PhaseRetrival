@@ -4,6 +4,7 @@ function phaseRetrivalCaller(confFile)
 % but can also jump to a specific function directly
 % if the program has finished the former functions before.
 allparams = xmlread(confFile);
+opticalparams = allparams.getSoleElement('opticalparams');
 imageparams = allparams.getSoleElement('images');
 focusimage = imageparams.getSoleElement('focusimage');
 medianimage1 = imageparams.getSoleElement('medianimage1');
@@ -11,8 +12,9 @@ medianimage2 = imageparams.getSoleElement('medianimage2');
 medianimage3 = imageparams.getSoleElement('medianimage3');
 referenceimage = imageparams.getSoleElement('referenceimage');
 
-wavelength =  allparams.getSoleElementData('wavelength').str2double;
-pixelsize = allparams.getSoleElementData('pixelsize').str2double;
+optpar.wavelength =  opticalparams.getSoleElementData('wavelength').str2double;
+optpar.pixelsize = opticalparams.getSoleElementData('pixelsize').str2double;
+optpar.NAs =  opticalparams.getSoleElementData('NAs').str2double;
 step = bin2dec(allparams.getSoleElementData('step').char);
 path = allparams.getSoleElementData('path').char;
 
@@ -51,7 +53,7 @@ if(bitand(step, 1) )
     medBg3 = openxmlFigures(path, medianimagebg3);
     medImg3 = max(medImg3 - medBg3, 0);
 
-    RefPhaseRetrival1(focImg, medImg1, medImg2, medImg3, focZ, medZ1, medZ2, medZ3, pixelsize, wavelength, path);
+    RefPhaseRetrival1(focImg, medImg1, medImg2, medImg3, focZ, medZ1, medZ2, medZ3, optpar, path);
 end
 
 %% RefPhaseRetrival2
@@ -60,7 +62,7 @@ end
 if(bitand(step, 2) )
     medianimagebg3 = imageparams.getSoleElement('medianimagebg3');
     referenceimagebg = imageparams.getSoleElement('referenceimagebg');
-    
+
     medImg3 = openxmlFigures(path, medianimage3);
     medBg3 = openxmlFigures(path, medianimagebg3);
     medImg3 = max(medImg3 - medBg3, 0);
@@ -69,7 +71,8 @@ if(bitand(step, 2) )
     refbg = openxmlFigures(path, referenceimagebg);
     refImg = max(refImg - refbg, 0);
 
-    [refPhi] = RefPhaseRetrival2(medImg3, medZ3, refImg, refZ, pixelsize, wavelength, path);
+    [refPhi] = RefPhaseRetrival2(medImg3, medZ3, refImg, refZ, optpar, path);
+
     save([path 'Result\ReferencePhase.mat'],'refPhi');
 end
 
@@ -77,20 +80,23 @@ end
 % Get the signal holograph via reference intensity, phase and signal intensity
 
 if(bitand(step, 4) )
-
     atomimage = imageparams.getSoleElement('atomimage');
     atomimagebg = imageparams.getSoleElement('atomimagebg');
-    
+
     [atomImg] = openxmlFigures(path, atomimage);
     atomRefImg = atomImg(:,:,2);
     atomImg = atomImg(:,:,1);
     [atomBg] = openxmlFigures(path, atomimagebg);
     atomRefBg = atomBg(:,:,2);
     atomBg = atomBg(:,:,1);
-    
-    [coRef, coHolbg, coRefbg] = AtomHologramOptimization(atomImg, atomRefImg, atomBg, atomRefBg, refZ, pixelsize, wavelength, path);
+
+    atomZ=-695;
+    atomShadowN=[480 625];
+    atomPositionN=[3020 3940];
+    iterN=100;
+    [coRef, coHolbg, coRefbg] = AtomHologramOptimization(atomImg, atomRefImg, atomBg, atomRefBg, refZ, atomZ, optpar, path);
     % coRef = 1; coHolbg = 1; coRefbg = 0;
-    SignalImageRetrival1(atomCut, coRef * atomCutRef, coHolbg * atomCutBk1, coRefbg * atomCutBk2, refZ, focZ, pixelsize, wavelength, path);
+    SignalImageRetrival1(atomCut, coRef * atomCutRef, coHolbg * atomCutBk1, coRefbg * atomCutBk2, refZ, focZ, optpar, path);
 end
 
 end
