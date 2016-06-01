@@ -1,4 +1,4 @@
-function RefPhaseRetrival1(image0, image1, image2, image3, z0, z1, z2, z3, pixelsize, wavelength, FilePath)
+function RefPhaseRetrival1(image0, image1, image2, image3, z0, z1, z2, z3, params, FilePath)
 % image0 focal
 % image1 small
 % image2 medium
@@ -8,11 +8,13 @@ function RefPhaseRetrival1(image0, image1, image2, image3, z0, z1, z2, z3, pixel
 % An optimization is applied to readjusted the zi.
 
 gpuDevice(1);
-z10 = z1; z20 = z2; z30 = z3;
+wavelength =  params.wavelength;
+pixelsize = params.pixelsize;
+NAs = params.NAs;
 resize = 6;
+z10 = z1; z20 = z2; z30 = z3;
 k = 2 * pi / wavelength;  % Wave Vector
 k0=k;
-NAs = 0.35;
 displayN = 100; % Display the intermediate result every displayN iterations
 optimizeN = 500; % Optimize the distance from zi to zi0 every optimizeN iterations
 
@@ -71,7 +73,7 @@ options.TolX = 1e-18; options.TolFun = 1e-18; options.MaxFunEvals = 1000;
 
 z1 = z10 + coef2(1); z2 = z20 + coef1(1); z3 = z30 + coef3(1);
 
-while j < 100000
+while j < 240000
     j = j + 1
     %     cep stands for current estimated picture
     %      cep = ifft2(kwindow .* exp(1i * sqrt(k^2 - kkx .^ 2 - kky .^ 2) * (z2 - z3) ) .* fft2(gpuImage3 .* exp(1i * curPhi) ) );
@@ -91,7 +93,7 @@ while j < 100000
     
     cep=fft2(gpuImage2 .* exp(1i * curPhi));
     if (mod(j, optimizeN) == 2)
-        fun1 = @(x) gather(sum(sum(abs(x(2) * (abs(ifft2(kwindow .* exp(1i * sqrt(k^2 - kkx .^ 2 - kky .^ 2) * (z10 + x(1) - z2 ) ) .* cep) ) ).^2 - gpuImage2.^2) ) ) );
+        fun1 = @(x) gather(sum(sum(abs(x(2) * (abs(ifft2(kwindow .* exp(1i * sqrt(k^2 - kkx .^ 2 - kky .^ 2) * (z10 + x(1) - z2 ) ) .* cep) ) ).^2 - gpuImage1.^2) ) ) );
         [coef2] = fminunc(fun1, coef2, options)
         z1 = z10 + coef2(1);
     end
@@ -100,7 +102,7 @@ while j < 100000
     
     cep=fft2(gpuImage1 .* exp(1i * curPhi));
     if (mod(j, optimizeN) ==3)
-        fun1 = @(x) gather(sum(sum(abs(x(2) * (abs(ifft2(kwindow .* exp(1i * sqrt(k^2 - kkx .^ 2 - kky .^ 2) * (z30 + x(1) - z1 ) ) .* cep) ) ).^2 - gpuImage2.^2) ) ) );
+        fun1 = @(x) gather(sum(sum(abs(x(2) * (abs(ifft2(kwindow .* exp(1i * sqrt(k^2 - kkx .^ 2 - kky .^ 2) * (z30 + x(1) - z1 ) ) .* cep) ) ).^2 - gpuImage3.^2) ) ) );
         [coef3] = fminunc(fun1, coef3, options)
         z3 = z30 + coef3(1);
     end
@@ -108,14 +110,20 @@ while j < 100000
     curPhi = angle(cep);
     
     if (mod(j, displayN) == 0)
-        subplot(2, 2, 1); imagesc(x, y, gpuImage3.^2); colorbar; title(['iteration = ' num2str(j) ', original image3']);        
+        subplot(2, 2, 1); imagesc(x, y, gpuImage3); colorbar; title(['iteration = ' num2str(j) ', original image3']);        
         subplot(2, 2, 2); imagesc(x, y, coef3(2)^.5 * (abs(cep) ) ); colorbar; title(['iteration = ' num2str(j) ', ep3']);        
         subplot(2, 2, 3); imagesc(x, y, sin(curPhi - iniPhi) ); colorbar; title(['iteration = ' num2str(j) ', angle']);
-        % res = abs( coef3(2) * (abs(cep) ).^2  - (gpuImage3).^2) / max( (gpuImage3(:) .^2) );
+        % This is a magic function :)
+        % residue = abs( coef3(2) * (abs(cep) ).^2  - (gpuImage3).^2) / max( (gpuImage3(:) .^2) );
         a = coef3(2) * (abs(cep) ).^2;
         b = gpuImage3.^2;
+        a=a(1500:5100,2500:6300);
+        b=b(1500:5100,2500:6300);
         a = a(:); b = b(:);
-        residue = 1 - dot(a - mean(a), b - mean(b) ) / (size([a; b], 1) * std(a) * std(b) );
+        % This one calculates the normalized cross correlation
+        % residue = 1 - dot(a - mean(a), b - mean(b) ) / (size([a; b], 1) * std(a) * std(b) );
+        % This one calculates the cosine of the general angle between two column vectors
+        residue = 1 - sum(a.*b) /sqrt(sum(a.^2)*sum(b.^2));
         resArray(ceil( (j - inij) / displayN ) ) = residue;
         subplot(2, 2, 4); plot(inij + 1: displayN : j, resArray(1 : ceil( (j - inij) / displayN ) ), 'x');
         drawnow;
@@ -123,9 +131,9 @@ while j < 100000
     end
 end
 
-%gpuImage3
-%cep, its amplitude should match gpuImage3, if so, then its phase is
-%reliable and should be saved. if not, then we really should use iniPhi
-% x1 = gpuImage3 .* (cos(curPhi - iniPhi) + 1i * sin(curPhi - iniPhi) );
-% curPhiSmoothed = gather(angle(ifft2(kwindow2 .* fft2(gpuArray(x1) ) ) ) ) + iniPhi;
-% save([resPath 'currentphase.mat'], 'curPhiSmoothed', 'iniPhi', '-append');
+% Smoothed Phase
+delphi = gpuImage3 .* (cos(curPhi - iniPhi) + 1i * sin(curPhi - iniPhi) );
+% Averaging filter
+ones(10)
+curPhiSmoothed = gather(angle(filter2(fspecial('average',10), delphi) ) ) + iniPhi;
+save([resPath 'currentphase.mat'], 'curPhiSmoothed', 'iniPhi', '-append');
