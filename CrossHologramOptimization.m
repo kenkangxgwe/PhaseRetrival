@@ -1,9 +1,11 @@
-function [coRefI, coHolBg, coRefBg] = HologramOptimization1(holI, refI, holBg, refBg, refZ, pixelsize, wavelength, FilePath)
+function [coRefI, coHolBg, coRefBg] = CrossHologramOptimization(holI, refI, holBg, refBg, refZ, params, FilePath)
 
 gpuDevice(1);
+wavelength =  params.wavelength;
+pixelsize = params.pixelsize;
+NAs = params.NAs;
 resize = 6;
 k = 2 * pi / wavelength;  %Wave Vector
-NAs = 0.35;
 
 resPath = [FilePath 'Result\'];
 
