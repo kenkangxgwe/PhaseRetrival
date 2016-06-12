@@ -25,6 +25,12 @@ medZ2 = 0.625 * medianimage2.getSoleElementData('z').str2double;
 medZ3 = 0.625 * medianimage3.getSoleElementData('z').str2double; 
 refZ = 0.625 * referenceimage.getSoleElementData('z').str2double; 
 
+atomShadowN=[505 695];
+atomPositionN=[3080 4270];
+resThreshold=2e-3; %residual threshold
+iterN=200;
+
+
 
 %% RefPhaseRetrival1
 % A iterative algorithm to get the phase infomation of image a1
@@ -66,7 +72,7 @@ if(bitand(step, 2) )
     medImg3 = openxmlFigures(path, medianimage3);
     medBg3 = openxmlFigures(path, medianimagebg3);
     medImg3 = max(medImg3 - medBg3, 0);
-    
+
     refImg =  openxmlFigures(path, referenceimage);
     refbg = openxmlFigures(path, referenceimagebg);
     refImg = max(refImg - refbg, 0);
@@ -90,13 +96,21 @@ if(bitand(step, 4) )
     atomRefBg = atomBg(:,:,2);
     atomBg = atomBg(:,:,1);
 
-    atomZ=-695;
+    atomZ=-2220;
     atomShadowN=[480 625];
-    atomPositionN=[3020 3940];
+    atomPositionN=[3080 4250];
     iterN=100;
-    [coRef, coHolbg, coRefbg] = AtomHologramOptimization(atomImg, atomRefImg, atomBg, atomRefBg, refZ, atomZ, optpar, path);
-    % coRef = 1; coHolbg = 1; coRefbg = 0;
-    SignalImageRetrival1(atomCut, coRef * atomCutRef, coHolbg * atomCutBk1, coRefbg * atomCutBk2, refZ, focZ, optpar, path);
+    [res, coRef, coHolbg, coRefbg] = AtomHologramOptimization1(atomImg, atomRefImg, atomShadowN, atomBg, atomRefBg);
+  % here the output res gives "how good" is the subtraction, from 0 to 1. 
+    
+    [sigEatom, resize]=SignalImageRetrival1b(atomImg, coRef * atomRefImg, coHolbg * atomBg, coRefbg * atomRefBg, refZ, atomZ,atomPositionN, iterN, optpar, path);
+     
+    medianimagebg3 = imageparams.getSoleElement('medianimagebg3');    medImg3 = openxmlFigures(path, medianimage3);
+    medBg3 = openxmlFigures(path, medianimagebg3);
+    medImg3 = max(medImg3 - medBg3, 0);
+    OD_PHI(sigEatom,atomZ,medImg3,medZ3,optpar,resize,path)
+
+%     SignalImageRetrival1(atomCut, coRef * atomCutRef, coHolbg * atomCutBk1, coRefbg * atomCutBk2, refZ, focZ, optpar, path);
 end
 
 end
