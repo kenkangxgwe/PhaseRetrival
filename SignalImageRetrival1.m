@@ -9,7 +9,7 @@ k = 2 * pi / wavelength;  %Wave Vector
 resPath = [FilePath 'Result\'];
 
 if(exist([resPath 'ReferencePhase.mat'], 'file') )
-    load([resPath 'ReferencePhase.mat'], 'refPhi');
+    load([resPath 'ReferencePhase.mat'], 'ERPhiRef');
 else
     error('ReferencePhase.mat does not exist');
 end
@@ -22,7 +22,7 @@ refDiff = max(refDiff, 0.01);
 holDiff = imresize(gpuArray(holDiff), resize);
 refE = real(sqrt(complex(imresize(gpuArray(refDiff), resize) ) ) ); % E = sqrt(I)
 
-holE = holDiff./ (refE .* exp(- 1i * refPhi) );
+holE = holDiff./ (refE .* exp(- 1i * ERPhiRef) );
 
 [rowSize, colSize] = size(holE);
 eySize = ceil(rowSize * 1);
@@ -39,7 +39,7 @@ kkx = gpuArray(kkx); kky = gpuArray(kky);
 kwindow = exp(- (kkx .^ 2+kky .^ 2) / k^2 / NAs^2);
 kwindow = kwindow > (max(kwindow(:) ) / 2.71828);
 
-nxDisp=2000:4000;
+nxDisp=3000:7000;
 nyDisp=2000:4000;
 % gpuHolE = gpuArray(refE .* exp(1i * refPhi) );
 
@@ -51,16 +51,22 @@ figure;
 % z = 1;
 % zAtom=(-.573)*25400;
 
-for sigZ = refZ : -100 : focZ
+% for sigZ = refZ : -500 : focZ
+for sigZ = -1800 : -20 : -2300
 % for sigZ = (zAtom+2000):-100 : (zAtom-2000)
 % for sigZ = -9652.7 : -10 : -9782.7
 %         sigZ = -9682.7
-    sigE = ifft2(kwindow .* exp(1i * sqrt(k^2 - kkx .^ 2 - kky .^ 2) * (sigZ - refZ) ) .* fft2(gpuHolE , eySize, exSize) );
-    imagesc(abs(sigE(nyDisp,nxDisp) ) ); colorbar; title(['sigZ = ' num2str(sigZ)]);
+    sigE = ifft2(kwindow .* exp(1i * sqrt(k^2 - kkx .^ 2 - kky .^ 2) * (sigZ - refZ) ) .* fft2(holE , eySize, exSize) );
+    imagesc(abs(sigE(nyDisp,nxDisp) ) ); colorbar; title(['sigZ = ' num2str(sigZ)]);zoom(2);
     drawnow;
     %         spaceMat(:, :, z) =imresize(abs(sigE(nyDisp,nxDisp) ), 1/resize);
     %     z = z + 1;
 end
+
+% posEatom=-2220;%position 
+% sigEatom =gather(ifft2(kwindow .* exp(1i * sqrt(k^2 - kkx .^ 2 - kky .^ 2) * (posEatom - refZ) ) .* fft2(holE , eySize, exSize) ));
+% clear holE holDiff refDiff;
+
 
 %     save([resPath 'Dipoletrap_MOT1d0V_Exp1d0ms200.mat'], 'spaceMat');
 % end

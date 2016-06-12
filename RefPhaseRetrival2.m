@@ -31,7 +31,10 @@ kx = fftshift(kx); ky = fftshift(ky);
 kkx = gpuArray(kkx); kky = gpuArray(kky);
 kwindow = exp(- (kkx .^ 2+kky .^ 2) / k^2 / NAs^2);
 kwindow = kwindow > (max(kwindow(:) ) / 2.71828);
+% mask = gpuArray(zeros(rowSize, colSize));
+% mask(2600:3000, 3600:4000) = 1;
 tarWavex = ifft2(kwindow .* exp(1i * sqrt(k^2 - kkx .^ 2 - kky .^ 2) * (tarZ - srcZ) ) .* fft2(gpuSrcImg .* exp(1i * srcPhi), eySize, exSize) );
+% tarWavex = ifft2(kwindow .* exp(1i * sqrt(k^2 - kkx .^ 2 - kky .^ 2) * (tarZ - srcZ) ) .* fft2(gpuSrcImg .* mask .* exp(1i * srcPhi), eySize, exSize) );
 tarWavex = tarWavex(1: rowSize , 1 : colSize);
 clear kkx kky;
 

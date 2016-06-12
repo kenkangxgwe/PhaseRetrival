@@ -73,7 +73,7 @@ options.TolX = 1e-18; options.TolFun = 1e-18; options.MaxFunEvals = 1000;
 
 z1 = z10 + coef2(1); z2 = z20 + coef1(1); z3 = z30 + coef3(1);
 
-while j < 240000
+while j < 550000
     j = j + 1
     %     cep stands for current estimated picture
     %      cep = ifft2(kwindow .* exp(1i * sqrt(k^2 - kkx .^ 2 - kky .^ 2) * (z2 - z3) ) .* fft2(gpuImage3 .* exp(1i * curPhi) ) );
